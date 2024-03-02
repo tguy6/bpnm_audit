@@ -1,0 +1,19 @@
+{
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^2.0.2",
+    "@nomiclabs/hardhat-etherscan": "^3.1.7",
+    "chai": "^4.3.7",
+    "hardhat": "^2.19.1"
+  },
+  "dependencies": {
+    "@openzeppelin/cli": "^2.8.2",
+    "@openzeppelin/contracts": "^4.9.3",
+    "aws-sdk": "^2.1505.0",
+    "axios": "^1.6.2",
+    "hardhat-contract-sizer": "^2.6.1",
+    "ipfs-mini": "^1.1.5",
+    "react-dropdown": "^1.11.0",
+    "react-select": "^5.7.1",
+    "serve": "^14.2.0"
+  }
+}
