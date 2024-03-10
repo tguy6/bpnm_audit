@@ -380,7 +380,7 @@ const {
     /**
      * @dev enable_test allows to set which test blocks to run, should be all 1 to run all tests to measure coverage
      */
-    // const enable_test = [0,0,0,0,0,0,0,0,0,0,0,0,0,1,0]
+    // const enable_test = [0,0,0,0,0,0,0,0,0,0,0,1,0,0,0]
     const enable_test = [0,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
 
 
@@ -2421,7 +2421,7 @@ const {
             await _bpnm.connect(_user1).buyLimitPack(9);    
             let totalDistributedTokens = await _bpnm.nftMintTokenDistributedAmount()
             console.log('Distributed mint tokens=',Number(totalDistributedTokens))
-            expect(Number(totalDistributedTokens)).to.equal(4)//500 USDT of limit pack purchase to get 1 token. 2000 USDT = 4 tokens
+            expect(Number(totalDistributedTokens)).to.equal(20+4)//500 USDT of limit pack purchase to get 1 token. 2000 USDT = 4 tokens
             
             let u1MintBalance = await _bpnm.mintTokenBalance(user1);
             console.log('U1 Mint tokens balance=',Number(u1MintBalance))
@@ -2434,9 +2434,13 @@ const {
             await _bpnm.connect(_user1).mintNFT()
             console.log('USER 1 | NFT Owner=',await _nft.getTokensByOwner(_user1.address))
             
+            //if users start minitng NFT we cannot distribute first 20
+            await expect(_nft.mintFirstTwenty(user1)).to.be.revertedWith('Zero supply needed');
+
+
             totalDistributedTokens = await _bpnm.nftMintTokenDistributedAmount()
             console.log('Distributed mint tokens=',Number(totalDistributedTokens))
-            expect(Number(totalDistributedTokens)).to.equal(4)//500 USDT of limit pack purchase to get 1 token. 2000 USDT = 4 tokens. Not changed after mint
+            expect(Number(totalDistributedTokens)).to.equal(20+4)//500 USDT of limit pack purchase to get 1 token. 2000 USDT = 4 tokens. Not changed after mint
             
             u1MintBalance = await _bpnm.mintTokenBalance(user1);
             console.log('U1 Mint tokens balance=',Number(u1MintBalance))
@@ -2523,7 +2527,7 @@ const {
             await _bpnm.connect(_user1).replenishPaymentBalance(utils.parseEther("4000"));    
             await _bpnm.connect(_user1).buyLimitPack(10);    
             const totalDistributedTokens = await _bpnm.nftMintTokenDistributedAmount();
-            expect(Number(totalDistributedTokens)).to.equal(0)//no rounding to lower. so 0
+            expect(Number(totalDistributedTokens)).to.equal(20+0)//no rounding to lower. so 20 pre-minted NFT
 
             
             //claim gwt profit
@@ -3126,6 +3130,49 @@ const {
 
             
         });
+
+        //first 20 tokens pre-minted
+        
+        it("First 20 tokens pre-minted", async function () {
+            const { _bpnm, _busd, _tree, _owner, _user1, _user2, _user3, _busd_owner, _gwt, _btcb, _btcbCollector, _nft } = await loadFixture(firstUserRegisters);
+            
+            await _nft.mintFirstTwenty(user1)
+
+            let totalDistributedTokens = await _bpnm.nftMintTokenDistributedAmount()
+            console.log('Distributed mint tokens=',Number(totalDistributedTokens))
+            expect(Number(totalDistributedTokens)).to.equal(20)
+
+            let u1Balance = await _nft.balanceOf(user1);
+            console.log('U1 NFT tokens balance=',Number(u1Balance))
+            expect(Number(u1Balance)).to.equal(20)
+
+            let u1Tokens = await _nft.getTokensByOwner(_user1.address);//user owned token IDs
+            let t1Rarity = await _nft.getTokenRarityLevel(Number(u1Tokens[0]))
+            let t10Rarity = await _nft.getTokenRarityLevel(Number(u1Tokens[9]))
+            let t20Rarity = await _nft.getTokenRarityLevel(Number(u1Tokens[19]))
+            
+            t1RealRarity = await _nft.getTokenRarityLevel(1)
+            t10RealRarity = await _nft.getTokenRarityLevel(10)
+            t20RealRarity = await _nft.getTokenRarityLevel(20)
+
+            
+            expect(Number(t1Rarity)).to.equal(Number(t1RealRarity))
+            expect(Number(t10Rarity)).to.equal(Number(t10RealRarity))
+            expect(Number(t20Rarity)).to.equal(Number(t20RealRarity))
+            
+            let u1TotalRarity = await _nft.getAddressTotalRarityLevel(_user1.address);
+            let nftTotalRarity = await _nft.releasedRarity();
+            expect(Number(u1TotalRarity)).to.equal(Number(nftTotalRarity))
+
+
+            
+            await expect(_nft.connect(_user1).mintFirstTwenty(user1)).to.be.revertedWithCustomError(_nft,'OwnableUnauthorizedAccount');
+
+            
+            
+        });
+
+
 
     });
            
