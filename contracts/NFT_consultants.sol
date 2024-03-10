@@ -88,6 +88,19 @@ contract PhenomenalConsultants is ERC721, ERC721Enumerable, Ownable {
 
     }
 
+    /** Mint first 20 NFT tokens with special rarity and images
+     * @dev Used once after contract deployment.
+     */
+    function mintFirstTwenty(address receiverAddress) external onlyOwner {
+        require(totalSupply()==0,'Zero supply needed');
+        uint tokenId;
+        for (uint16 i = 1; i <= 20; i++) {
+            tokenId = i;
+            _mint(receiverAddress, tokenId, tokenId);
+        }
+
+    }
+
     
     /**
      * @dev Get rarity level for a specific token
@@ -129,6 +142,10 @@ contract PhenomenalConsultants is ERC721, ERC721Enumerable, Ownable {
         //get tokenID
         uint tokenId = _availableTokenIds[freeTokenIdx];
 
+        _mint(receiverAddress, tokenId, freeTokenIdx);
+    }
+
+    function _mint(address receiverAddress, uint tokenId, uint freeTokenIdx) private {
         //mint token
         _safeMint(receiverAddress,tokenId);
         //remove token ID from not owned list
@@ -143,8 +160,8 @@ contract PhenomenalConsultants is ERC721, ERC721Enumerable, Ownable {
         releasedRarity += _rarityLevels[tokenId];
 
         emit minted(receiverAddress,tokenId);
-    }
 
+    }
 
     /**
      * @dev Get token IDs owned by a specific address

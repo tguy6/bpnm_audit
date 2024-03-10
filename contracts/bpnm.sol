@@ -146,7 +146,7 @@ contract bpnmMain is IERC20Metadata, Ownable {
     bool public prestartMode = true;//Activated on deploy. Allow only activate and limit pack purchase. Can be disabled once
     
     uint public nftMintTokenMaxAmount = 3000;//Max amount of tokens to mint NFT. Can be increased up to 10 000
-    uint public nftMintTokenDistributedAmount;//Distributed amount of tokens to mint NFT.
+    uint public nftMintTokenDistributedAmount=20;//Distributed amount of tokens to mint NFT. First 20 pre-minted
     uint public nftMintTokenTurnoverRequired = 500e18;//Amount of turnover required to get 1 NFT mint token.
     
     uint public nftDiscountForLimitPackPrice = 10;//Amount of discount user get for each point of rarity for LP purchase. 1 = 0.0001%. Rarity calcs as 1200-NFT rarity. With rarity = 1000 total discount is 1000*0.0001%*10=1%. Max 10%
