@@ -100,20 +100,20 @@ const {
 
         const totalNft = 10000
         //deploy NFT consultants
-        let nftCons = await ethers.getContractFactory("PhenomenalConsultants");
+        let nftCons = await ethers.getContractFactory("ERC721PhenomenalConsultants");
         const _nft = await nftCons.connect(_owner).deploy(owner,_busd.address,feeCollector,_gwt.address,totalNft);
         console.log("NFT address=",_nft.address);
         
 
         //deploy bpnm
-        Token = await ethers.getContractFactory("bpnmMain");
+        Token = await ethers.getContractFactory("BEP20BPNM");
         const _bpnm = await Token.connect(_owner).deploy(_busd.address, _btcb.address,_tree.address,_gwt.address,feeCollector, liquidityCollector, btcbCollector, _nft.address);
         console.log("bPNM address=",_bpnm.address);
         //unlock bpnm
         await _bpnm.triggerLock()
 
         //deploy btcbCollector
-        let btcbColl = await ethers.getContractFactory("phenomenalLiquidityDistributor");
+        let btcbColl = await ethers.getContractFactory("PhenomenalLiquidityDistributor");
         const _btcbCollector = await btcbColl.connect(_owner).deploy(_btcb.address,_bpnm.address);
         // await _btcbCollector.init(_btcb.address,_bpnm.address);
         console.log("PLD address=",_btcbCollector.address);
@@ -380,7 +380,7 @@ const {
     /**
      * @dev enable_test allows to set which test blocks to run, should be all 1 to run all tests to measure coverage
      */
-    // const enable_test = [0,0,0,0,0,0,0,0,0,0,0,1,0,0,0]
+    // const enable_test = [0,0,1,1,0,0,0,0,0,0,0,0,0,0,0]
     const enable_test = [0,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
 
 
@@ -431,7 +431,7 @@ const {
         it("First user should be activated", async function () {
             const { _bpnm, _busd, _tree, _owner } = await loadFixture(firstUserRegisters);
             data = await _bpnm.isUserExists(user1)
-            userdata = await _bpnm.users(user1)
+            userdata = await _bpnm.Users(user1)
             console.log("🚀 ~ file: bpnm_tests.js:124 ~ userdata:", userdata)
             console.log(data)
             expect(userdata[8]).to.equal(1);
@@ -457,7 +457,7 @@ const {
 
         it("Have limit pack", async function () {
             const { _bpnm, _busd, _tree, _owner } = await loadFixture(firstUserRegisters);
-            data = await _bpnm.users(user1)
+            data = await _bpnm.Users(user1)
             // console.log("🚀 ~ file: bpnm_tests.js:301 ~ data:", data.limitPackId)
             
             
@@ -476,7 +476,7 @@ const {
 
         it("Earn limit increased", async function () {
             const { _bpnm, _busd, _tree, _owner } = await loadFixture(firstUserRegisters);
-            data = await _bpnm.users(user1)
+            data = await _bpnm.Users(user1)
             const weiValue = utils.parseEther("30");
             expect(data.earnLimitLeft).to.equal(weiValue);
         });
@@ -514,7 +514,7 @@ const {
             expect(frozen.frozenAmount[4]).to.equal(lvl5frozen);
             expect(frozen.frozenAmount[13]).to.equal(lvl14frozen);
             
-            userdata = await _bpnm.users(signers[1].address)
+            userdata = await _bpnm.Users(signers[1].address)
             const lvl4bonus = utils.parseEther("0.1");//lvl 4 bonus is 1% so 0.1 USDT
             expect(userdata.balance.usdt).to.equal(lvl4bonus);
             const earnLimitLeft = utils.parseEther("29.9");//30 - 0.1
@@ -586,7 +586,7 @@ const {
 
             // for (let i=1;i<=16;i++) {
             //     console.log(signers[i].address)
-            //     userdata = await _bpnm.users(signers[i].address)
+            //     userdata = await _bpnm.Users(signers[i].address)
             //     //get frozen balances
             //     console.log("🚀 [%s] User %s bal = %s USDT", i, signers[i].address, utils.formatEther(userdata.balance.usdt))
             //     const frozen = await _bpnm.addressFrozenTotal(signers[i].address,0)
@@ -612,7 +612,7 @@ const {
             //purchase pack
             await _bpnm.connect(signers[1]).buyLimitPack(9)
 
-            const userData = await _bpnm.users(signers[1].address)
+            const userData = await _bpnm.Users(signers[1].address)
             console.log("🚀 ~ file: bpnm_tests.js:423 ~ userData:", userData)
             const frozen = await _bpnm.addressFrozenTotal(signers[1].address,0)
             console.log("🚀 ~ file: bpnm_tests.js:427 ~ frozen:", frozen)
@@ -640,7 +640,7 @@ const {
             //purchase pack
             await _bpnm.connect(signers[14]).buyLimitPack(9)
 
-            const userData2 = await _bpnm.users(signers[1].address)
+            const userData2 = await _bpnm.Users(signers[1].address)
             console.log("🚀 ~ file: bpnm_tests.js:423 ~ userData:", userData2)
             const frozen2 = await _bpnm.addressFrozenTotal(signers[1].address,0)
             console.log("🚀 ~ file: bpnm_tests.js:427 ~ frozen:", frozen2)
@@ -689,7 +689,7 @@ const {
             // console.log("🚀 ~ file: bpnm_tests.js:477 ~ feeCollBal:", feeCollBal)
 
             //check amount of earn limit
-            const earnlimit1 = await _bpnm.users(signers[1].address)
+            const earnlimit1 = await _bpnm.Users(signers[1].address)
             // console.log("🚀 ~ file: bpnm_tests.js:536 ~ earnlimit1:", utils.formatEther(earnlimit1.earnLimitLeft))
             // console.log("🚀 ~ file: bpnm_tests.js:536 ~ balance1:", utils.formatEther(earnlimit1.balance.usdt))
             //user1 buy max pack, all unfrozes
@@ -709,7 +709,7 @@ const {
             // console.log("🚀 ~ file: bpnm_tests.js:491 ~ frozen2:", frozen2)
             
             //check amount of earn limit
-            const earnlimit2 = await _bpnm.users(signers[1].address)
+            const earnlimit2 = await _bpnm.Users(signers[1].address)
             // console.log("🚀 ~ file: bpnm_tests.js:554 ~ earnlimit2:", utils.formatEther(earnlimit2.earnLimitLeft))
             // console.log("🚀 ~ file: bpnm_tests.js:554 ~ balance:", utils.formatEther(earnlimit2.balance.usdt))
             const earnLimitleft = utils.parseEther("20027.545");
@@ -726,7 +726,7 @@ const {
             await _bpnm.connect(signers[16]).buyLimitPack(1)
             
             //user1 should get bonus with 10% comission, 0.4 usdt - 10% = 0.36 usdt
-            const earnlimit3 = await _bpnm.users(signers[1].address)
+            const earnlimit3 = await _bpnm.Users(signers[1].address)
             // console.log("🚀 ~ file: bpnm_tests.js:575 ~ earnlimit3:", utils.formatEther(earnlimit3.earnLimitLeft))
             // console.log("🚀 ~ file: bpnm_tests.js:575 ~ balance:", utils.formatEther(earnlimit3.balance.usdt))
             expect(earnlimit3.earnLimitLeft).to.equal(utils.parseEther("20027.185"));//+30 - 0.1 + 20000 - 2.355 - 0.36 = 20027.185
@@ -813,14 +813,14 @@ const {
         const frozen5 = await _bpnm.addressFrozenTotal(signers[5].address,0)
         // console.log("🚀 ~ file: bpnm_tests.js:664 ~ frozen5:", frozen5)
         
-        const userData5 = await _bpnm.users(signers[5].address)
+        const userData5 = await _bpnm.Users(signers[5].address)
         console.log("🚀 ~ file: bpnm_tests.js:536 ~ earnlimit1:", utils.formatEther(userData5.earnLimitLeft))
         console.log("🚀 ~ file: bpnm_tests.js:536 ~ balance1:", utils.formatEther(userData5.balance.usdt))
         
         // const frozen7 = await _bpnm.addressFrozenTotal(signers[7].address,0)
         // console.log("🚀 ~ file: bpnm_tests.js:664 ~ frozen5:", frozen7)
         
-        let userData1 = await _bpnm.users(signers[1].address)
+        let userData1 = await _bpnm.Users(signers[1].address)
         console.log("1🚀 ~ file: bpnm_tests.js:875 ~ earnlimit1:", utils.formatEther(userData1.earnLimitLeft))
         console.log("1🚀 ~ file: bpnm_tests.js:876 ~ balance1:", utils.formatEther(userData1.balance.usdt))
         
@@ -836,7 +836,7 @@ const {
         await _bpnm.connect(signers[10]).buyLimitPack(12);    
         
         
-        userData1 = await _bpnm.users(signers[1].address)
+        userData1 = await _bpnm.Users(signers[1].address)
         console.log("3🚀 ~ file: bpnm_tests.js:888 ~ earnlimit1:", utils.formatEther(userData1.earnLimitLeft))
         console.log("3🚀 ~ file: bpnm_tests.js:889 ~ balance1:", utils.formatEther(userData1.balance.usdt))
         
@@ -909,7 +909,7 @@ const {
             
             
             
-            let userData1 = await _bpnm.users(signers[1].address)
+            let userData1 = await _bpnm.Users(signers[1].address)
             console.log("1🚀 ~ file: bpnm_tests.js:536 ~ earnlimit1:", utils.formatEther(userData1.earnLimitLeft))
             console.log("1🚀 ~ file: bpnm_tests.js:536 ~ balance1:", utils.formatEther(userData1.balance.usdt))
                     
@@ -993,7 +993,7 @@ const {
             
             
             
-            let userData1 = await _bpnm.users(signers[1].address)
+            let userData1 = await _bpnm.Users(signers[1].address)
             console.log("1🚀 ~ file: bpnm_tests.js:536 ~ earnlimit1:", utils.formatEther(userData1.earnLimitLeft))
             console.log("1🚀 ~ file: bpnm_tests.js:536 ~ balance1:", utils.formatEther(userData1.balance.usdt))
             
@@ -1086,7 +1086,7 @@ const {
 
             // for (let i=1;i<=16;i++) {
             //     console.log(signers[i].address)
-            //     userdata = await _bpnm.users(signers[i].address)
+            //     userdata = await _bpnm.Users(signers[i].address)
             //     //get frozen balances
             //     console.log("🚀 [%s] User %s bal = %s USDT", i, signers[i].address, utils.formatEther(userdata.balance.usdt))
             //     const frozen = await _bpnm.addressFrozenTotal(signers[i].address,0)
@@ -1136,7 +1136,7 @@ const {
             
             // console.log("🚀 ~ file: bpnm_tests.js:664 ~ frozen5:", frozen5)
             
-            userData1 = await _bpnm.users(signers[1].address)
+            userData1 = await _bpnm.Users(signers[1].address)
             console.log("🚀 ~ file: bpnm_tests.js:536 ~ earnlimit1:", utils.formatEther(userData1.earnLimitLeft))
             console.log("🚀 ~ file: bpnm_tests.js:536 ~ balance1:", utils.formatEther(userData1.balance.usdt))
             
@@ -1147,7 +1147,7 @@ const {
             
             await _bpnm.connect(signers[1]).buyLimitPack(2);    
             
-            userData1 = await _bpnm.users(signers[1].address)
+            userData1 = await _bpnm.Users(signers[1].address)
             console.log("🚀 ~ file: bpnm_tests.js:536 ~ earnlimit1:", utils.formatEther(userData1.earnLimitLeft))
             console.log("🚀 ~ file: bpnm_tests.js:536 ~ balance1:", utils.formatEther(userData1.balance.usdt))
             
@@ -1160,7 +1160,7 @@ const {
             
             await _bpnm.connect(signers[1]).buyLimitPack(2);    
             
-            userData1 = await _bpnm.users(signers[1].address)
+            userData1 = await _bpnm.Users(signers[1].address)
             console.log("🚀 ~ file: bpnm_tests.js:536 ~ earnlimit1:", utils.formatEther(userData1.earnLimitLeft))
             console.log("🚀 ~ file: bpnm_tests.js:536 ~ balance1:", utils.formatEther(userData1.balance.usdt))
             
@@ -1172,7 +1172,7 @@ const {
             
             await _bpnm.connect(signers[1]).buyLimitPack(2);    
             
-            userData1 = await _bpnm.users(signers[1].address)
+            userData1 = await _bpnm.Users(signers[1].address)
             console.log("🚀 ~ file: bpnm_tests.js:536 ~ earnlimit1:", utils.formatEther(userData1.earnLimitLeft))
             console.log("🚀 ~ file: bpnm_tests.js:536 ~ balance1:", utils.formatEther(userData1.balance.usdt))
             
@@ -1221,7 +1221,7 @@ const {
             expect(frozen1.frozenAmount[4]).to.equal(utils.parseEther("160"));//2% of 10000 minus 80%
             
             
-            userData1 = await _bpnm.users(signers[1].address)
+            userData1 = await _bpnm.Users(signers[1].address)
             console.log("🚀 ~ file: bpnm_tests.js:536 ~ earnlimit1:", utils.formatEther(userData1.earnLimitLeft))
             console.log("🚀 ~ file: bpnm_tests.js:536 ~ balance1:", utils.formatEther(userData1.balance.usdt))
             
@@ -1242,7 +1242,7 @@ const {
             
             // await calcCompanyValue(_busd,_bpnm)
 
-            userData1 = await _bpnm.users(signers[1].address)
+            userData1 = await _bpnm.Users(signers[1].address)
             console.log("🚀 ~ file: bpnm_tests.js:536 ~ earnlimit1:", utils.formatEther(userData1.earnLimitLeft))
             console.log("🚀 ~ file: bpnm_tests.js:536 ~ balance1:", utils.formatEther(userData1.balance.usdt))
             
@@ -1275,14 +1275,14 @@ const {
             await _bpnm.connect(_user1).replenishPaymentBalance(utils.parseEther("11"))
             
             //usdt deposited correctly
-            userdata = await _bpnm.users(user1)
+            userdata = await _bpnm.Users(user1)
             console.log("U1 bal= %s USDT", utils.formatEther(userdata.balance.usdt))
             expect(userdata.balance.usdt).to.equal(utils.parseEther("11"));
             
             //perform withdraw
             await _bpnm.connect(_user1).withdrawBalance(utils.parseEther("10"),0,1)
 
-            userdata = await _bpnm.users(user1)
+            userdata = await _bpnm.Users(user1)
             console.log("U1 bal= %s USDT", utils.formatEther(userdata.balance.usdt))
             expect(userdata.balance.usdt).to.equal(utils.parseEther("1"));
             
@@ -1315,7 +1315,7 @@ const {
             
             await calcCompanyValue(_busd,_bpnm)
 
-            userdata = await _bpnm.users(user1)
+            userdata = await _bpnm.Users(user1)
             console.log("U1 bal= %s USDT", utils.formatEther(userdata.balance.usdt))
             expect(userdata.balance.usdt).to.equal(utils.parseEther("21"));
             
@@ -1372,7 +1372,7 @@ const {
             await calcCompanyValue(_busd,_bpnm)
 
             //user internal balance deposited
-            userdata = await _bpnm.users(user1)
+            userdata = await _bpnm.Users(user1)
             console.log("U1 bal= %s USDT", utils.formatEther(userdata.balance.usdt))
             expect(userdata.balance.usdt).to.equal(utils.parseEther("21"));
             
@@ -1430,7 +1430,7 @@ const {
             
             //user7 balance before matching            
             console.log("User7 addr= %s",user7)
-            userData = await _bpnm.users(user7)
+            userData = await _bpnm.Users(user7)
             console.log("U7 balance= %s USDT", utils.formatEther(userData.balance.usdt))//funds got unfrozen
             console.log("U7 earn limit= %s USDT", utils.formatEther(userData[3]))//earn limit 30 + 2100 = 2130
             expect(userData.balance.usdt).to.equal(utils.parseEther("1.135"));
@@ -1442,7 +1442,7 @@ const {
             await _bpnm.connect(signers[14]).withdrawBalance(utils.parseEther("10"),0,1)
             
             console.log("User7 addr= %s",user7)
-            userData = await _bpnm.users(user7)
+            userData = await _bpnm.Users(user7)
             console.log("U7 balance= %s USDT", utils.formatEther(userData.balance.usdt))
             console.log("U7 earn limit= %s USDT", utils.formatEther(userData[3]))//earn limit
             expect(userData.balance.usdt).to.equal(utils.parseEther("1.18"));//1.135 + 0.05 - 10% fee = 1.135 + 0.045 = 1.18
@@ -1487,7 +1487,7 @@ const {
             
             //user7 balance before matching            
             console.log("User7 addr= %s",user7)
-            userData = await _bpnm.users(user7)
+            userData = await _bpnm.Users(user7)
             console.log("U7 balance= %s USDT", utils.formatEther(userData.balance.usdt))//funds got unfrozen
             console.log("U7 earn limit= %s USDT", utils.formatEther(userData[3]))//earn limit 30 + 2100 = 2130
             expect(userData.balance.usdt).to.equal(utils.parseEther("1.135"));
@@ -1499,7 +1499,7 @@ const {
             await _bpnm.connect(signers[14]).withdrawBalance(utils.parseEther("10"),0,1)
             
             console.log("User7 addr= %s",user7)
-            userData = await _bpnm.users(user7)
+            userData = await _bpnm.Users(user7)
             console.log("U7 balance= %s USDT", utils.formatEther(userData.balance.usdt))
             console.log("U7 earn limit= %s USDT", utils.formatEther(userData[3]))//earn limit
             expect(userData.balance.usdt).to.equal(utils.parseEther("1.135"));//not changed
@@ -1536,12 +1536,12 @@ const {
             
             
             //this user will not receive bonus
-            userdata = await _bpnm.users(user4)
+            userdata = await _bpnm.Users(user4)
             console.log("U4 bal= %s USDT", utils.formatEther(userdata.balance.usdt))
             expect(userdata.balance.usdt).to.equal(utils.parseEther("3600"));
             
             //this user will received bonus last
-            userdata = await _bpnm.users(user5)
+            userdata = await _bpnm.Users(user5)
             console.log("U5 bal= %s USDT", utils.formatEther(userdata.balance.usdt))
             expect(userdata.balance.usdt).to.equal(utils.parseEther("3600"));
             
@@ -1556,12 +1556,12 @@ const {
                         
             
             //this user did not receive bonus
-            userdata = await _bpnm.users(user4)
+            userdata = await _bpnm.Users(user4)
             console.log("U4 bal= %s USDT", utils.formatEther(userdata.balance.usdt))
             expect(userdata.balance.usdt).to.equal(utils.parseEther("3600"));
             
             //this user received bonus last
-            userdata = await _bpnm.users(user5)
+            userdata = await _bpnm.Users(user5)
             console.log("U5 bal= %s USDT", utils.formatEther(userdata.balance.usdt))
             expect(userdata.balance.usdt).to.equal(utils.parseEther("3600.045"));
             
@@ -1577,7 +1577,7 @@ const {
     
             await calcCompanyValue(_busd,_bpnm)
 
-            userdata = await _bpnm.users(signers[14].address)
+            userdata = await _bpnm.Users(signers[14].address)
             console.log("U1 balance= %s USDT", utils.formatEther(userdata.balance.usdt))
             
             //check amount of frozen at lvl 14. User will get matching to frozen for this level because lvl 10 and 11 are skipped due to unpaid matching
@@ -1613,7 +1613,7 @@ const {
             expect(frozenU2[0][13]).to.equal(utils.parseEther("18.0225"));//added 50% of 0.05 USDT minus 10% fee = 0.025 - 10% = 0.0225
 
             console.log("User2 addr= %s",user2)
-            userData = await _bpnm.users(user2)
+            userData = await _bpnm.Users(user2)
             console.log("U2 balance= %s USDT", utils.formatEther(userData.balance.usdt))
             
             
@@ -1642,12 +1642,12 @@ const {
             //buy matching for U7
             await _bpnm.connect(signers[7]).extendMatchingBonus()
             //get date when matching is active
-            userData = await _bpnm.users(user7)
+            userData = await _bpnm.Users(user7)
             endDate1 = userData[11]
             
             await _bpnm.connect(signers[7]).extendMatchingBonus()
             //30 days should be added
-            userData = await _bpnm.users(user7)
+            userData = await _bpnm.Users(user7)
             endDate2 = userData[11]
                         
             expect(Number(endDate2)-Number(endDate1)).to.equal(60*60*24*30);//30 days added
@@ -1683,7 +1683,7 @@ const {
             //buy matching for U7
             await _bpnm.connect(signers[7]).extendMatchingBonus()
             //get date when matching is active
-            userData = await _bpnm.users(user7)
+            userData = await _bpnm.Users(user7)
             endDate1 = userData[11]
             console.log("🚀 ~ file: bpnm_tests.js:1316 ~ endDate1:", endDate1)
             
@@ -1693,7 +1693,7 @@ const {
             
             await _bpnm.connect(signers[7]).extendMatchingBonus()
             //30 days should be added from date of payment
-            userData = await _bpnm.users(user7)
+            userData = await _bpnm.Users(user7)
             endDate2 = userData[11]
             console.log("🚀 ~ file: bpnm_tests.js:1325 ~ endDate2:", endDate2)
             
@@ -1728,7 +1728,7 @@ const {
             //despoit 150 usdt to internal balance
             await _bpnm.connect(_user1).replenishPaymentBalance(utils.parseEther("150"))
             
-            userdata = await _bpnm.users(user1)
+            userdata = await _bpnm.Users(user1)
             console.log("🚀 ~ file: bpnm_tests.js:124 ~ earn_limit_before:", utils.formatEther(userdata[3]))
             // expect(userdata[4]).to.equal(utils.parseEther("10"));
             gwtBalance = await _gwt.balanceOf(user1)
@@ -1744,7 +1744,7 @@ const {
             
             await _bpnm.connect(_user1).buyEarnLimitWithGwt(utils.parseEther("1"))
             
-            userdata = await _bpnm.users(user1)
+            userdata = await _bpnm.Users(user1)
             //earn limit increased
             expect(userdata[3]).to.equal(utils.parseEther("391"))//30 for pack1  + 360 for pack 5 + 1 bought = 391
             
@@ -1755,7 +1755,7 @@ const {
             expect(usdtBalanceAfter).to.equal(utils.parseEther("0"))//150 +2 minus 150 for limit pack minus 2 for fee
             
             //first check is if exceeds 10%, so try to buy more than 10% to get revert
-            overlimits = await _bpnm.userOverLimits(user1)
+            overlimits = await _bpnm.UserOverLimits(user1)
             leftFor10Percent = Number(utils.formatEther(overlimits.totalEarnLimit))/10-Number(utils.formatEther(overlimits.purchasedEarnLimit))
             console.log("🚀 ~ file: bpnm_tests.js:1616 ~ leftFor10Percent:", leftFor10Percent)
             
@@ -1780,7 +1780,7 @@ const {
             await _busd.connect(_user1).increaseAllowance(_bpnm.address,utils.parseEther("10"))
             //despoit 10 usdt
             
-            userdata = await _bpnm.users(user1)
+            userdata = await _bpnm.Users(user1)
             console.log("Buy limit: ", utils.formatEther(userdata.buyLimitLeft))
             // expect(userdata[4]).to.equal(utils.parseEther("10"));
             gwtBalance = await _gwt.balanceOf(user1)
@@ -1792,7 +1792,7 @@ const {
             
             await _bpnm.connect(_user1).buyPurchaseLimit(utils.parseEther("1"))
             
-            userdata = await _bpnm.users(user1)
+            userdata = await _bpnm.Users(user1)
             expect(userdata.buyLimitLeft).to.equal(utils.parseEther("0.00082"))//1 GWT = 5 USDT of buy limit. 1 USDT = 1/ 50000 = 0.00002. Final 0.0008 + 0.00002 = 0.00082
             
             gwtBalance = await _gwt.balanceOf(user1)
@@ -1801,7 +1801,7 @@ const {
             usdtBalanceAfter = await _busd.balanceOf(user1)
             expect(usdtBalanceAfter).to.equal(utils.parseEther("8"))//10 - 2 fee
 
-            overlimits = await _bpnm.userOverLimits(user1)
+            overlimits = await _bpnm.UserOverLimits(user1)
             leftFor10Percent = Number(utils.formatEther(overlimits.totalBuyLimit))/10-Number(utils.formatEther(overlimits.purchasedBuyLimit))
             console.log("🚀 ~ file: bpnm_tests.js:1658 ~ leftFor10Percent:", leftFor10Percent)
 
@@ -1845,7 +1845,7 @@ const {
             console.log("price bPNM=", await _bpnm.bpnmPrice())
 
                                     
-            userdata2 = await _bpnm.users(user1)
+            userdata2 = await _bpnm.Users(user1)
             expect(userdata2.sellLimitLeft).to.equal(utils.parseEther("0.0012"))
 
             gwtBalance = await _gwt.balanceOf(user1)
@@ -1855,7 +1855,7 @@ const {
             
             await _bpnm.connect(_user1).buySellLimit(utils.parseEther("1"))
             
-            userdata2 = await _bpnm.users(user1)
+            userdata2 = await _bpnm.Users(user1)
             // console.log("🚀 ~ file: bpnm_tests.js:509 ~ userdata2:", utils.formatEther(userdata2.sellLimitLeft))
             expect(userdata2.sellLimitLeft).to.equal(utils.parseEther("0.00122"))//0.00012+0.00002
 
@@ -1900,7 +1900,7 @@ const {
             await _bpnm.connect(_user1).extendLvlMarketingBonus()
 
             gwtBalance = await _gwt.balanceOf(user1)
-            userData = await _bpnm.connect(_user1).users(user1)
+            userData = await _bpnm.connect(_user1).Users(user1)
             expect(gwtBalance).to.equal(utils.parseEther("304"))//404-100
             expect(Number(userData.extendedTreeLvl)).to.equal(4)//lvl4
             console.log("Active +1% lvl=",userData.extendedTreeLvl)
@@ -1911,7 +1911,7 @@ const {
             await _bpnm.connect(_user1).extendLvlMarketingBonus()
 
             gwtBalance = await _gwt.balanceOf(user1)
-            userData = await _bpnm.connect(_user1).users(user1)
+            userData = await _bpnm.connect(_user1).Users(user1)
             expect(gwtBalance).to.equal(utils.parseEther("54"))//304-250
             expect(Number(userData.extendedTreeLvl)).to.equal(5)//lvl5
             
@@ -1999,7 +1999,7 @@ const {
             //increase allowance
             await _busd.connect(_user1).increaseAllowance(_bpnm.address,utils.parseEther("10"))
             
-            userdata = await _bpnm.users(user1)
+            userdata = await _bpnm.Users(user1)
             // console.log("🚀 ~ file: bpnm_tests.js:124 ~ buy limit:", utils.formatEther(userdata[4]))
             expect(userdata[4]).to.equal(utils.parseEther("0.0008"))//40 USDT with BTC price of 50000 = 0.0008 BTCB limit
 
@@ -2076,7 +2076,7 @@ const {
             //pld deposited with fee
             expect(pldBalance).to.equal(utils.parseEther("0.00015"))//15% of 0.001 = 0.00015
             
-            const userData = await _bpnm.users(user1)
+            const userData = await _bpnm.Users(user1)
             console.log("🚀 ~ file: bpnm_tests.js:1371 ~ userData:", utils.formatEther(userData[4]))
             expect(userData[4]).to.equal(utils.parseEther("0.0006"))//Buy limit | 0.0016 - 0.001 = 0.0006
             expect(userData[5]).to.equal(utils.parseEther("0.0015"))//Sell limit |  0.001 * 150% = 0.0015
@@ -2157,7 +2157,7 @@ const {
             expect(bpnmUserBalance).to.equal(utils.parseEther("3.25"))//4.25-1
 
             //sell limit decreased
-            const userData = await _bpnm.users(user1)
+            const userData = await _bpnm.Users(user1)
             console.log("User sell lmt= %s", utils.formatEther(userData[5]))
             expect(userData[5]).to.equal(utils.parseEther("0.0013"))//Sell limit is 0.001*1.5 = 0.0015 | 0.0015-1*0.0002 = 0.0013
 
@@ -2237,7 +2237,7 @@ const {
             let bpnmBalanceBtcb = await _btcb.balanceOf(_bpnm.address)
             console.log("bPNM BTCB balance= %s BTCB",utils.formatEther(bpnmBalanceBtcb))
             //trigger unlock
-            let unlockTime = await _btcbCollector.lastLiquidityUnlockTime();
+            let unlockTime = await _btcbCollector.LastLiquidityUnlockTime();
             console.log("🚀 ~ file: bpnm_tests.js:727 ~ unlockTime:", unlockTime)
             await _btcbCollector.performUnlock();
             
@@ -2252,7 +2252,7 @@ const {
             expect(pldBalanceBtcb).to.be.equal(utils.parseEther("9.984444368237385625"))//
             
 
-            unlockTime = await _btcbCollector.lastLiquidityUnlockTime();
+            unlockTime = await _btcbCollector.LastLiquidityUnlockTime();
             console.log("🚀 ~ file: bpnm_tests.js:727 ~ unlockTime:", unlockTime)
             await _btcbCollector.performUnlock();
             expect(bpnmBalanceBtcb).to.be.equal(utils.parseEther("4.515555631762614375"))//not changed
@@ -2262,7 +2262,7 @@ const {
             
             await time.increase(60*60*1);//wait 1 hour. Total 24+ hours, should release
             
-            unlockTime = await _btcbCollector.lastLiquidityUnlockTime();
+            unlockTime = await _btcbCollector.LastLiquidityUnlockTime();
             console.log("🚀 ~ file: bpnm_tests.js:727 ~ unlockTime:", unlockTime)
             await _btcbCollector.performUnlock();
             bpnmBalanceBtcb = await _btcb.balanceOf(_bpnm.address)
@@ -2273,7 +2273,7 @@ const {
             
             await time.increase(60*60*1);//wait 1 hour. Less than 24 hours after last unlock, should not release
             
-            unlockTime = await _btcbCollector.lastLiquidityUnlockTime();
+            unlockTime = await _btcbCollector.LastLiquidityUnlockTime();
             console.log("🚀 ~ file: bpnm_tests.js:727 ~ unlockTime:", unlockTime)
             await _btcbCollector.performUnlock();
             
@@ -2423,7 +2423,7 @@ const {
             console.log('Distributed mint tokens=',Number(totalDistributedTokens))
             expect(Number(totalDistributedTokens)).to.equal(20+4)//500 USDT of limit pack purchase to get 1 token. 2000 USDT = 4 tokens
             
-            let u1MintBalance = await _bpnm.mintTokenBalance(user1);
+            let u1MintBalance = await _bpnm.MintTokenBalance(user1);
             console.log('U1 Mint tokens balance=',Number(u1MintBalance))
             expect(Number(u1MintBalance)).to.equal(4)//500 USDT of limit pack purchase to get 1 token. 2000 USDT = 4 tokens
             
@@ -2442,7 +2442,7 @@ const {
             console.log('Distributed mint tokens=',Number(totalDistributedTokens))
             expect(Number(totalDistributedTokens)).to.equal(20+4)//500 USDT of limit pack purchase to get 1 token. 2000 USDT = 4 tokens. Not changed after mint
             
-            u1MintBalance = await _bpnm.mintTokenBalance(user1);
+            u1MintBalance = await _bpnm.MintTokenBalance(user1);
             console.log('U1 Mint tokens balance=',Number(u1MintBalance))
             expect(Number(u1MintBalance)).to.equal(2)//500 USDT of limit pack purchase to get 1 token. 2000 USDT = 4 tokens. 2 already used for mint
             
@@ -2452,7 +2452,7 @@ const {
             await _bpnm.connect(_user1).mintNFT()
             console.log('USER 1 | NFT Owner=',await _nft.getTokensByOwner(_user1.address))
             
-            u1MintBalance = await _bpnm.mintTokenBalance(user1);
+            u1MintBalance = await _bpnm.MintTokenBalance(user1);
             console.log('U1 Mint tokens balance=',Number(u1MintBalance))
             expect(Number(u1MintBalance)).to.equal(0)//500 USDT of limit pack purchase to get 1 token. 2000 USDT = 4 tokens. 4 already used for mint
             
@@ -2563,7 +2563,7 @@ const {
             await _bpnm.connect(_user1).buyLimitPack(9);    
             await _bpnm.connect(_user1).buyLimitPack(9);    
             
-            let u1MintBalance = await _bpnm.mintTokenBalance(user1);
+            let u1MintBalance = await _bpnm.MintTokenBalance(user1);
             console.log('U1 Mint tokens balance=',Number(u1MintBalance))
             expect(Number(u1MintBalance)).to.equal(4)//500 USDT of limit pack purchase to get 1 token. 2000 USDT = 4 tokens
             
@@ -2690,7 +2690,7 @@ const {
             await _bpnm.connect(_user1).buyLimitPack(9);    
             await _bpnm.connect(_user1).buyLimitPack(9);    
             
-            let u1MintBalance = await _bpnm.mintTokenBalance(user1);
+            let u1MintBalance = await _bpnm.MintTokenBalance(user1);
             console.log('U1 Mint tokens balance=',Number(u1MintBalance))
             expect(Number(u1MintBalance)).to.equal(4)//500 USDT of limit pack purchase to get 1 token. 2000 USDT = 4 tokens
             
@@ -2747,7 +2747,7 @@ const {
 
             await calcCompanyValue(_busd,_bpnm)
 
-            userdata = await _bpnm.users(user1)
+            userdata = await _bpnm.Users(user1)
             console.log("U1 bal= %s USDT", utils.formatEther(userdata.balance.usdt))
             // expect(userdata.balance.usdt).to.equal(utils.parseEther("21"));
             
@@ -2858,7 +2858,7 @@ const {
 
             await calcCompanyValue(_busd,_bpnm)
 
-            userdata = await _bpnm.users(user1)
+            userdata = await _bpnm.Users(user1)
             console.log("U1 bal= %s USDT", utils.formatEther(userdata.balance.usdt))
             // expect(userdata.balance.usdt).to.equal(utils.parseEther("21"));
             
@@ -2878,7 +2878,7 @@ const {
             await calcCompanyValue(_busd,_bpnm)
             
             //check internal balance
-            userdata = await _bpnm.users(user1)
+            userdata = await _bpnm.Users(user1)
             console.log("U1 bal= %s USDT", utils.formatEther(userdata.balance.usdt))
             expect(_bigIntToFixedFloat(userdata.balance.usdt)).to.equal((100000-8000-5000-10000+discountAmount).toFixed(3));//Deposit 100000, 4x2000 +5000 limit pack purchase, nftdiscount returned to balance
             
@@ -2900,7 +2900,7 @@ const {
             
             await calcCompanyValue(_busd,_bpnm)
             
-            userdata = await _bpnm.users(user1)
+            userdata = await _bpnm.Users(user1)
             console.log("U1 bal= %s USDT", utils.formatEther(userdata.balance.usdt))
             expect(_bigIntToFixedFloat(userdata.balance.usdt)).to.equal((100000-8000-5000-10000-10000+discountAmount+1000).toFixed(3));//Deposit 100000, 3x10000 limit pack purchase, nftdiscount returned for second pack, 10% of cost returned for last pack = 1000
             
@@ -2941,7 +2941,7 @@ const {
             let u1TotalRarity = await _nft.getAddressTotalRarityLevel(_user1.address);
             console.log("U1 rarity= %s", Number(u1TotalRarity))
 
-            userdata = await _bpnm.users(user1)
+            userdata = await _bpnm.Users(user1)
             console.log("U1 bal= %s USDT", utils.formatEther(userdata.balance.usdt))
             // expect(userdata.balance.usdt).to.equal(utils.parseEther("21"));
             
@@ -2959,7 +2959,7 @@ const {
             // await calcCompanyValue(_busd,_bpnm)
             
             //check internal balance
-            userdata = await _bpnm.users(user1)
+            userdata = await _bpnm.Users(user1)
             console.log("U1 bal= %s USDT", utils.formatEther(userdata.balance.usdt))
             
             gwtBalance = await _gwt.balanceOf(user1)
@@ -3032,7 +3032,7 @@ const {
             await _bpnm.connect(_user1).buyLimitPack(10);    //4tokens
             await _bpnm.connect(_user1).buyLimitPack(10);    //4tokens
             
-            const u1MintTokens = await _bpnm.mintTokenBalance(user1)
+            const u1MintTokens = await _bpnm.MintTokenBalance(user1)
             expect(Number(u1MintTokens)).to.equal(16);
 
             //mint 3 nft to user with bpnm contract
@@ -3047,7 +3047,7 @@ const {
             let u1TotalRarity = await _nft.getAddressTotalRarityLevel(_user1.address);
             console.log("U1 rarity= %s", Number(u1TotalRarity))
 
-            userdata = await _bpnm.users(user1)
+            userdata = await _bpnm.Users(user1)
             console.log("U1 bal= %s USDT", utils.formatEther(userdata.balance.usdt))
             // expect(userdata.balance.usdt).to.equal(utils.parseEther("21"));
             
@@ -3066,7 +3066,7 @@ const {
             // await calcCompanyValue(_busd,_bpnm)
             
             //check internal balance
-            userdata = await _bpnm.users(user1)
+            userdata = await _bpnm.Users(user1)
             console.log("U1 bal= %s USDT", utils.formatEther(userdata.balance.usdt))
             
             gwtBalance = await _gwt.balanceOf(user1)
@@ -3197,7 +3197,7 @@ const {
             
             
             
-            firstItem = await _bpnm.marketplace(1)
+            firstItem = await _bpnm.Marketplace(1)
             expect(firstItem.name).to.equal("Test item");
             expect(firstItem.claimLink).to.equal("http://test.com");
             expect(firstItem.bpnmPrice).to.equal(utils.parseEther("10"));
@@ -3218,31 +3218,31 @@ const {
             totalItems = await _bpnm.totalMarketplaceItems()
             expect(Number(totalItems)).to.equal(1);
             
-            firstItem = await _bpnm.marketplace(1)
+            firstItem = await _bpnm.Marketplace(1)
             expect(firstItem.isActive).to.equal(false);
             
             //enable item
             await _bpnm.triggerMarketItemActive(1)
             
-            firstItem = await _bpnm.marketplace(1)
+            firstItem = await _bpnm.Marketplace(1)
             expect(firstItem.isActive).to.equal(true);
             
             //disable item
             await _bpnm.triggerMarketItemActive(1)
             
-            firstItem = await _bpnm.marketplace(1)
+            firstItem = await _bpnm.Marketplace(1)
             expect(firstItem.isActive).to.equal(false);
             
             //enable item verify
             await _bpnm.triggerMarketItemVerify(1)
             
-            firstItem = await _bpnm.marketplace(1)
+            firstItem = await _bpnm.Marketplace(1)
             expect(firstItem.isVerifyRequired).to.equal(true);
             
             //disable item  verify
             await _bpnm.triggerMarketItemVerify(1)
             
-            firstItem = await _bpnm.marketplace(1)
+            firstItem = await _bpnm.Marketplace(1)
             expect(firstItem.isVerifyRequired).to.equal(false);
             
             
@@ -3323,7 +3323,7 @@ const {
             expect(userbpnmBalance).to.equal(utils.parseEther("4.25"))//0.00085/0.0002 = 4.25 bPNM
                         
             
-            firstItem = await _bpnm.marketplace(1)
+            firstItem = await _bpnm.Marketplace(1)
             // console.log("🚀 ~ file: bpnm_tests.js:1063 ~ firstItem:", firstItem)
             
             //test not active item purchase
@@ -3440,7 +3440,7 @@ const {
             expect(userbpnmBalance).to.equal(utils.parseEther("4.25"))//0.00085/0.0002 = 4.25 bPNM
                         
             
-            firstItem = await _bpnm.marketplace(1)
+            firstItem = await _bpnm.Marketplace(1)
             // console.log("🚀 ~ file: bpnm_tests.js:1063 ~ firstItem:", firstItem)
             
             
@@ -3506,7 +3506,7 @@ const {
             await _bpnm.addItemToMarketplace("Test item","http://test.com",utils.parseEther("10"),false,false,_user1.address)
 
             
-            firstItem = await _bpnm.marketplace(1)
+            firstItem = await _bpnm.Marketplace(1)
             console.log("🚀 ~ file: bpnm_tests.js:1063 ~ firstItem:", firstItem)
 
             //revert if not active
@@ -3558,7 +3558,7 @@ const {
             //enable item
             await _bpnm.triggerMarketItemActive(1)
             
-            firstItem = await _bpnm.marketplace(1)
+            firstItem = await _bpnm.Marketplace(1)
             expect(firstItem.isActive).to.equal(true);
             
             //only seller can update price
@@ -3568,7 +3568,7 @@ const {
             await _bpnm.connect(_user1).updateMarketItemPriceBySeller(1,utils.parseEther("5"))
             await expect(_bpnm.connect(_user1).updateMarketItemPriceBySeller(1,utils.parseEther("0"))).to.be.revertedWith("[bPNM] Non zero price required");
             
-            firstItem = await _bpnm.marketplace(1)
+            firstItem = await _bpnm.Marketplace(1)
             expect(firstItem.bpnmPrice).to.equal(utils.parseEther("5"));
             
             //only seller can disable
@@ -3577,7 +3577,7 @@ const {
             //disable item
             await _bpnm.connect(_user1).disableMarketItemActiveBySeller(1)
             
-            firstItem = await _bpnm.marketplace(1)
+            firstItem = await _bpnm.Marketplace(1)
             expect(firstItem.isActive).to.equal(false);
             
             //seller can not enable item
@@ -3599,7 +3599,7 @@ const {
             await _bpnm.updateMarketItemName(1,"Jimbo jumper")
             await _bpnm.updateMarketItemClaimLink(1,"http://newlink.com")
             
-            firstItem = await _bpnm.marketplace(1)
+            firstItem = await _bpnm.Marketplace(1)
             expect(firstItem.bpnmPrice).to.equal(utils.parseEther("5"));
             expect(firstItem.name).to.equal("Jimbo jumper");
             expect(firstItem.claimLink).to.equal("http://newlink.com");
@@ -3642,7 +3642,7 @@ const {
             //despoit 150 usdt to internal balance
             await _bpnm.connect(_user1).replenishPaymentBalance(utils.parseEther("150"))
             
-            userdata = await _bpnm.users(user1)
+            userdata = await _bpnm.Users(user1)
             expect(userdata.buyLimitLeft).to.equal(utils.parseEther("0.0008"));//40/50000 = 0.0008
             
             
@@ -3652,11 +3652,11 @@ const {
             await _bpnm.connect(_user1).buyLimitPack(1)
             
             
-            userdata = await _bpnm.users(user1)
+            userdata = await _bpnm.Users(user1)
             expect(userdata.buyLimitLeft).to.equal(utils.parseEther("0.0018"));//40/50000 = 0.0008 + 50/50000 = 0.0018
             
             //check overlimits
-            overlimits = await _bpnm.userOverLimits(user1)
+            overlimits = await _bpnm.UserOverLimits(user1)
             expect(overlimits.totalBuyLimit).to.equal(utils.parseEther("0.0018"));//40/50000 = 0.0008 + 50/50000 = 0.0018
         
             await expect(_bpnm.setBuyLimitMultiplier(0)).to.be.revertedWith("[bPNM] Out of range");
@@ -3698,7 +3698,7 @@ const {
             console.log("price bPNM=", await _bpnm.bpnmPrice())
             
             
-            userdata2 = await _bpnm.users(user1)
+            userdata2 = await _bpnm.Users(user1)
             expect(userdata2.sellLimitLeft).to.equal(utils.parseEther("0.0006"))
             
             
@@ -3706,10 +3706,10 @@ const {
             
             data = await _bpnm.connect(_user1).buyBpnm(utils.parseEther("0.0004"))
             
-            userdata = await _bpnm.users(user1)
+            userdata = await _bpnm.Users(user1)
             expect(userdata.sellLimitLeft).to.equal(utils.parseEther("0.0014"));//0.0004+0.0008
             //check overlimits
-            overlimits = await _bpnm.userOverLimits(user1)
+            overlimits = await _bpnm.UserOverLimits(user1)
             expect(overlimits.totalSellLimit).to.equal(utils.parseEther("0.0014"));//0.0004+0.0008
             
             await expect(_bpnm.setSellLimitMultiplier(9)).to.be.revertedWith("[bPNM] Out of range");
@@ -3798,7 +3798,7 @@ const {
             const timestamp = block.timestamp;
             
             
-            userData = await _bpnm.users(user1)
+            userData = await _bpnm.Users(user1)
             
             diff = Number(userData.matchingActiveUntil) - timestamp;
             
@@ -3823,7 +3823,7 @@ const {
             
             await _bpnm.connect(_user1).buyLimitPack(5)
             
-            userdata = await _bpnm.users(user1)
+            userdata = await _bpnm.Users(user1)
             expect(userdata.earnLimitLeft).to.equal(utils.parseEther("390"));//
             
 
@@ -3834,7 +3834,7 @@ const {
             await _bpnm.connect(_user1).buyEarnLimitWithGwt(utils.parseEther("5"))
             
             
-            userdata = await _bpnm.users(user1)
+            userdata = await _bpnm.Users(user1)
             expect(userdata.earnLimitLeft).to.equal(utils.parseEther("395"));//
 
             
@@ -3861,7 +3861,7 @@ const {
             
             await _bpnm.connect(_user1).buyLimitPack(5)
             
-            userdata = await _bpnm.users(user1)
+            userdata = await _bpnm.Users(user1)
             expect(userdata.buyLimitLeft).to.equal(utils.parseEther("0.0128"));//0.0008+0.012
             
 
@@ -3872,7 +3872,7 @@ const {
             await _bpnm.connect(_user1).buyPurchaseLimit(utils.parseEther("10"))
             
             
-            userdata = await _bpnm.users(user1)
+            userdata = await _bpnm.Users(user1)
             expect(userdata.buyLimitLeft).to.equal(utils.parseEther("0.013"));//0.0128+0.0002
 
             
@@ -3918,7 +3918,7 @@ const {
             console.log("price bPNM=", await _bpnm.bpnmPrice())
             
             
-            userdata2 = await _bpnm.users(user1)
+            userdata2 = await _bpnm.Users(user1)
             expect(userdata2.sellLimitLeft).to.equal(utils.parseEther("0.0012"))
             
             
@@ -3927,7 +3927,7 @@ const {
 
             data = await _bpnm.connect(_user1).buySellLimit(utils.parseEther("4"))
             
-            userdata = await _bpnm.users(user1)
+            userdata = await _bpnm.Users(user1)
             expect(userdata.sellLimitLeft).to.equal(utils.parseEther("0.00128"));//0.0012+0.00008
             
             gwtBalance = await _gwt.balanceOf(user1)
@@ -3953,7 +3953,7 @@ const {
             
             
             
-            userdata = await _bpnm.users(user1)
+            userdata = await _bpnm.Users(user1)
             expect(userdata.balance.usdt).to.equal(utils.parseEther("150"));//150 
             
 
@@ -3964,7 +3964,7 @@ const {
             await _bpnm.connect(_user1).withdrawBalance(utils.parseEther("10"),0,1)
             
             
-            userdata = await _bpnm.users(user1)
+            userdata = await _bpnm.Users(user1)
             expect(userdata.balance.usdt).to.equal(utils.parseEther("140"));//150 + 0.1 ref - 10
 
 
@@ -4016,7 +4016,7 @@ const {
             console.log("price bPNM=", await _bpnm.bpnmPrice())
             
             
-            userdata2 = await _bpnm.users(user1)
+            userdata2 = await _bpnm.Users(user1)
             expect(userdata2.bpnmBalance).to.equal(utils.parseEther("2"))//price 0.0002, purchase 0.0004 so 2 bpnm
             
             
@@ -4024,7 +4024,7 @@ const {
             
             data = await _bpnm.connect(_user1).buyBpnm(utils.parseEther("0.0004"))//
             
-            userdata = await _bpnm.users(user1)
+            userdata = await _bpnm.Users(user1)
             expect(userdata.bpnmBalance).to.equal(utils.parseEther("3.6"));//2+1.6
 
             
@@ -4072,7 +4072,7 @@ const {
             
             
             
-            userdata2 = await _bpnm.users(user1)
+            userdata2 = await _bpnm.Users(user1)
             expect(userdata2.bpnmBalance).to.equal(utils.parseEther("1.7"))//2-15%
             
 
@@ -4140,7 +4140,7 @@ const {
             
             await _bpnm.connect(_user1).buyLimitPack(10)
             
-            userdata = await _bpnm.mintTokenBalance(user1)
+            userdata = await _bpnm.MintTokenBalance(user1)
             expect(Number(userdata)).to.equal(2);
             
         
@@ -4161,7 +4161,7 @@ const {
             
             //buy pack to get nft token
             await _bpnm.connect(_user1).buyLimitPack(8)
-            userData = await _bpnm.users(user1)
+            userData = await _bpnm.Users(user1)
             expect(userData.balance.usdt).to.equal(utils.parseEther("1000"));//1500-500
             
             //mint nft
@@ -4175,7 +4175,7 @@ const {
             
             //buy pack to get discount
             await _bpnm.connect(_user1).buyLimitPack(8)
-            userData = await _bpnm.users(user1)
+            userData = await _bpnm.Users(user1)
             console.log("🚀 ~ file: bpnm_tests.js:3943 ~ userData:", userData.balance.usdt)
             expect(userData.balance.usdt).to.equal(utils.parseEther((1000-newPackPrice).toString()));//1000-500+discount
             
@@ -4191,7 +4191,7 @@ const {
             
             //buy pack to check increased discount
             await _bpnm.connect(_user1).buyLimitPack(8)
-            userData = await _bpnm.users(user1)
+            userData = await _bpnm.Users(user1)
             console.log("🚀 ~ file: bpnm_tests.js:3943 ~ userData:", userData.balance.usdt)
             console.log(newPackPrice+newPackPrice2)
             expect(_bigIntToFixedFloat(userData.balance.usdt)).to.equal(((1000-(newPackPrice+newPackPrice2)).toFixed(3)));//1000-500+discount
@@ -4216,7 +4216,7 @@ const {
             
             
             await _bpnm.connect(_user1).buyLimitPack(9)
-            userData = await _bpnm.users(user1)
+            userData = await _bpnm.Users(user1)
             
             discountSetting = await _bpnm.nftDiscountForMatchingPayment()
             await _bpnm.connect(_user1).mintNFT()            
@@ -4267,7 +4267,7 @@ const {
             
             
             await _bpnm.connect(_user1).buyLimitPack(9)
-            userData = await _bpnm.users(user1)
+            userData = await _bpnm.Users(user1)
             
             discountSetting = await _bpnm.nftDiscountForAdditionalMarketingPercent()
             expect(Number(discountSetting)).to.be.equal(10)
@@ -4513,7 +4513,7 @@ const {
             await expect(_bpnm.connect(_user1).addressVerify(user19)).not.to.be.reverted;
 
             //new user verified
-            newSetting = await _bpnm.isVerified(user19)
+            newSetting = await _bpnm.IsVerified(user19)
             expect(newSetting).to.equal(true);
             
             
@@ -4696,14 +4696,14 @@ const {
             
             //trigger unlock
             await _btcbCollector.performUnlock();//--unlock
-            unlockTime1 = await _btcbCollector.lastLiquidityUnlockTime();
+            unlockTime1 = await _btcbCollector.LastLiquidityUnlockTime();
             
             expect(bpnmBalanceBtcb).to.be.equal(utils.parseEther("4.5"))//not changed, 24h not passed since prestart disabled
             
             await time.increase(60*60*24);//wait 24 hours
 
             await _btcbCollector.performUnlock();//--unlock
-            unlockTime2 = await _btcbCollector.lastLiquidityUnlockTime();
+            unlockTime2 = await _btcbCollector.LastLiquidityUnlockTime();
             
             expect(Number(unlockTime1)).to.be.not.equal(Number(unlockTime2))//unlock times are different
             
@@ -4717,7 +4717,7 @@ const {
             
             await time.increase(60*60*24);//wait 24 hours
             await _btcbCollector.performUnlock();//--unlock
-            unlockTime3 = await _btcbCollector.lastLiquidityUnlockTime();
+            unlockTime3 = await _btcbCollector.LastLiquidityUnlockTime();
 
             //wait 24h to check that no unlock
             bpnmBalanceBtcb = await _btcb.balanceOf(_bpnm.address)
@@ -4726,7 +4726,7 @@ const {
             
             await time.increase(60*60*24);//wait 24 hours more, total 48 hours
             await _btcbCollector.performUnlock();//now should unlock
-            unlockTime4 = await _btcbCollector.lastLiquidityUnlockTime();
+            unlockTime4 = await _btcbCollector.LastLiquidityUnlockTime();
             
             expect(Number(unlockTime3)).to.not.be.equal(Number(unlockTime4))//unlock times are different
             
@@ -4758,7 +4758,7 @@ const {
             
             //trigger unlock
             await _btcbCollector.performUnlock();//--unlock
-            unlockTime1 = await _btcbCollector.lastLiquidityUnlockTime();
+            unlockTime1 = await _btcbCollector.LastLiquidityUnlockTime();
             
             bpnmBalanceBtcb = await _btcb.balanceOf(_bpnm.address)
             console.log("bPNM BTCB balance= %s BTCB",utils.formatEther(bpnmBalanceBtcb))
@@ -4827,7 +4827,7 @@ const {
             expect(await _payment2.balanceOf(_bpnm.address)).to.equal(utils.parseEther("100"))
             
             //check new balance deposited to user
-            userdataU1 = await _bpnm.users(signers[1].address)
+            userdataU1 = await _bpnm.Users(signers[1].address)
             expect(userdataU1.balance.payment2).to.equal(utils.parseEther("100"))
             
             //make withdraw
@@ -4865,7 +4865,7 @@ const {
             expect(await _payment3.balanceOf(_bpnm.address)).to.equal(utils.parseEther("100"))
             
             //check new balance deposited to user
-            userdataU1 = await _bpnm.users(signers[1].address)
+            userdataU1 = await _bpnm.Users(signers[1].address)
             expect(userdataU1.balance.payment3).to.equal(utils.parseEther("100"))
             
             //make withdraw
@@ -4918,7 +4918,7 @@ const {
             await _bpnm.connect(signers[1]).buyLimitPack(1)
             
             //new balance used
-            userdataU1 = await _bpnm.users(signers[1].address)
+            userdataU1 = await _bpnm.Users(signers[1].address)
             expect(userdataU1.balance.payment2).to.equal(utils.parseEther("0"))
             
             // expect(await _payment2.balanceOf(signers[1].address)).to.equal(utils.parseEther("909"))//900 + (10 - 10%)
@@ -4934,7 +4934,7 @@ const {
             await _bpnm.connect(signers[5]).buyLimitPack(1)
             
             //check u1 internal balance
-            userdataU1 = await _bpnm.users(signers[1].address)
+            userdataU1 = await _bpnm.Users(signers[1].address)
             expect(userdataU1.balance.payment2).to.equal(utils.parseEther("0.1"))
             
             //user6 buy pack, user1 should get 0.16 to new FROZEN balance as ref
@@ -4955,7 +4955,7 @@ const {
             await _bpnm.connect(signers[19]).activate(signers[19].address,signers[4].address,1)
             
             //check u1 internal balance
-            userdataU1 = await _bpnm.users(signers[1].address)
+            userdataU1 = await _bpnm.Users(signers[1].address)
             expect(userdataU1.balance.payment2).to.equal(utils.parseEther("0.2"))//new user in lvl4 so get ref
             
             //increase pack for u1 so payment2 funds unfrozen
@@ -4963,7 +4963,7 @@ const {
             await _bpnm.connect(signers[1]).replenishPaymentBalance(utils.parseEther("500"))
             await _bpnm.connect(signers[1]).buyLimitPack(8)
             
-            userdataU1 = await _bpnm.users(signers[1].address)
+            userdataU1 = await _bpnm.Users(signers[1].address)
             expect(userdataU1.balance.payment2).to.equal(utils.parseEther("0.36"))//0.2 + 0.16 = 0.36
             expect(userdataU1.balance.usdt).to.equal(utils.parseEther("0.1"))//unchanged
             
@@ -4980,7 +4980,7 @@ const {
             frozenUSDT = await _bpnm.addressFrozenTotal(signers[1].address,1)
             // console.log("🚀 ~ file: bpnm_tests.js:4606 ~ frozenUSDT:", frozenUSDT)
             
-            userdataU1 = await _bpnm.users(signers[1].address)
+            userdataU1 = await _bpnm.Users(signers[1].address)
             expect(userdataU1.balance.usdt).to.equal(utils.parseEther("1.615"))//0.1+0.16+0.21+0.21+0.195+0.26+0.24+0.24
 
             //matching deposited to payment2
@@ -4994,7 +4994,7 @@ const {
             await _bpnm.connect(signers[8]).withdrawBalance(utils.parseEther("100"),0,2)
 
             //check new balance deposited to user
-            userdataU1 = await _bpnm.users(signers[1].address)
+            userdataU1 = await _bpnm.Users(signers[1].address)
             expect(userdataU1.balance.payment2).to.equal(utils.parseEther("0.81"))//0.36 + (0.5 - 10%)
 
         });
@@ -5023,7 +5023,7 @@ const {
             await _bpnm.connect(signers[1]).buyLimitPack(1)
             
             //new balance used
-            userdataU1 = await _bpnm.users(signers[1].address)
+            userdataU1 = await _bpnm.Users(signers[1].address)
             expect(userdataU1.balance.payment3).to.equal(utils.parseEther("0"))
             
             // expect(await _payment2.balanceOf(signers[1].address)).to.equal(utils.parseEther("909"))//900 + (10 - 10%)
@@ -5039,7 +5039,7 @@ const {
             await _bpnm.connect(signers[5]).buyLimitPack(1)
             
             //check u1 internal balance
-            userdataU1 = await _bpnm.users(signers[1].address)
+            userdataU1 = await _bpnm.Users(signers[1].address)
             expect(userdataU1.balance.payment3).to.equal(utils.parseEther("0.1"))
             
             //user6 buy pack, user1 should get 0.16 to new FROZEN balance as ref
@@ -5060,7 +5060,7 @@ const {
             await _bpnm.connect(signers[19]).activate(signers[19].address,signers[4].address,1)
             
             //check u1 internal balance
-            userdataU1 = await _bpnm.users(signers[1].address)
+            userdataU1 = await _bpnm.Users(signers[1].address)
             expect(userdataU1.balance.payment3).to.equal(utils.parseEther("0.2"))//new user in lvl4 so get ref
             
             //increase pack for u1 so payment2 funds unfrozen
@@ -5068,7 +5068,7 @@ const {
             await _bpnm.connect(signers[1]).replenishPaymentBalance(utils.parseEther("500"))
             await _bpnm.connect(signers[1]).buyLimitPack(8)
             
-            userdataU1 = await _bpnm.users(signers[1].address)
+            userdataU1 = await _bpnm.Users(signers[1].address)
             expect(userdataU1.balance.payment3).to.equal(utils.parseEther("0.36"))//0.2 + 0.16 = 0.36
             expect(userdataU1.balance.usdt).to.equal(utils.parseEther("0.1"))//unchanged
             
@@ -5085,7 +5085,7 @@ const {
             frozenUSDT = await _bpnm.addressFrozenTotal(signers[1].address,1)
             // console.log("🚀 ~ file: bpnm_tests.js:4606 ~ frozenUSDT:", frozenUSDT)
             
-            userdataU1 = await _bpnm.users(signers[1].address)
+            userdataU1 = await _bpnm.Users(signers[1].address)
             expect(userdataU1.balance.usdt).to.equal(utils.parseEther("1.615"))//0.1+0.16+0.21+0.21+0.195+0.26+0.24+0.24
 
             //matching deposited to payment2
@@ -5099,7 +5099,7 @@ const {
             await _bpnm.connect(signers[8]).withdrawBalance(utils.parseEther("100"),0,3)
 
             //check new balance deposited to user
-            userdataU1 = await _bpnm.users(signers[1].address)
+            userdataU1 = await _bpnm.Users(signers[1].address)
             expect(userdataU1.balance.payment3).to.equal(utils.parseEther("0.81"))//0.36 + (0.5 - 10%)
 
             await expect(_bpnm.connect(signers[1]).releaseFrozenFunds(signers[1].address,4)).to.be.revertedWith("[bPNM] Incorrect payment ID");
