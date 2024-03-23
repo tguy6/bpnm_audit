@@ -32,7 +32,7 @@ contract ERC721PhenomenalConsultants is ERC721, ERC721Enumerable, Ownable {
     uint256 public immutable numberOfTokens;//amount of tokens in collection. Should be 10000
     uint256 private mintNonce;
     uint immutable public transferFee = 10e18;//10 USDT transfer fee
-    string private _baseTokenURI = "ipfs://bafybeiht73rqyi34oeasc7typtdaco54zxbwdmmdhwvzfi6t5pmp77lwai/"; 
+    string private _baseTokenURI = "ipfs://bafybeihfjre5ijn2obfpp6bnmk7sefecygdu6suihayvc3kqzttafi7msm/"; 
     uint public gwtPerDayForHundredRarity = 1e18;//GWT daily profit for 100 rarity of NFT. Rarity = upperRarityBound - actual NFT rarity
     uint public immutable upperRarityBound = 1200;//Upper bound from which NFT rarity is substracted to calculate GWT income. Worst NFT rarity = 1040
     uint16[] public _availableTokenIds;//list of not minted NFT ID

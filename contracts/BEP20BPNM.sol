@@ -164,14 +164,14 @@ contract BEP20BPNM is IERC20Metadata, Ownable {
     uint public _payment = 1;//ID of active payment method for Limit Pack purchase, usdt == 1, payment2 == 2, payment3 == 3
     uint public _usedBtcOracle = 0;//0 = both used, latest BTC price selected. 1 - Used only Binance oracle, 2 - Used only ChainLink oracle
 
-    limitPack[] public limitPacks;//List of limit packs
-    treeLvlData[] public treeLvls;//List of tree levels config
+    LimitPack[] public limitPacks;//List of limit packs
+    TreeLvlData[] public treeLvls;//List of tree levels config
     uint256[16] public additionalPercentCost;//Cost to unlock marketing +1% for each level. Starts with element ID 1
 
     struct User {
         address referrer;//By whom user has been referred to bPNM
         uint bpnmBalance;//User bPNM balance
-        _balance balance;//USDT/Paymnet2/Payment3 balances
+        Balance balance;//USDT/Paymnet2/Payment3 balances
         uint earnLimitLeft;//Amount of left earn limit
         uint buyLimitLeft;//Amount of left limit to buy bPNM, in BTCB
         uint sellLimitLeft;//Amount of left limit to sell bPNM, in BTCB
@@ -184,38 +184,38 @@ contract BEP20BPNM is IERC20Metadata, Ownable {
         
     }
 
-    struct _balance {
+    struct Balance {
         uint usdt;//User USDT balance
         uint payment2;//User payment2 balance. Reserve, might be used if moved from usdt to new payment token.
         uint payment3;//User payment3 balance. Reseve, might be used if moved from usdt to new payment token.
     }
 
-    struct _balanceFrozen {
+    struct BalanceFrozen {
         uint usdt;//Frozen USDT balance. Struct used for each tree Lvl
         uint payment2;//Frozen payment2 balance. Reserve, might be used if moved from usdt to new payment token.
         uint payment3;//Frozen payment3 balance. Reseve, might be used if moved from usdt to new payment token.
     }
 
-    struct frozenFundsStruct {
-        _balanceFrozen balance;//amount of frozen funds on a level
+    struct FrozenFundsStruct {
+        BalanceFrozen balance;//amount of frozen funds on a level
         uint startDate;//date from which frozen period timer starts for this level
     }
 
-    struct limitPack {
+    struct LimitPack {
         uint cost;//cost of limit pack
         uint treeDepth;//max tree depth unlocked by limit pack
         uint earnLimit;//earn limit deposited with limit pack purchase
         
     }
 
-    struct treeLvlData {
+    struct TreeLvlData {
         uint bonus;//bonus in percent from limit pack purchases on this level
         uint frozenPercent;//percent of funds that is frozen when corresponding tree level is not unlocked with limit pack
         uint maxFreezePeriod;//period of time before frozen funds are transferred to liquidity
         
     }
 
-    struct limitsPurchases {
+    struct LimitsPurchases {
         uint totalEarnLimit;//total amount of earn limit deposited from limit pack purchase
         uint purchasedEarnLimit;//amount of purchased earn limit with GWT, can not increase 10% of total deposited earn limit from packs
         
@@ -226,7 +226,7 @@ contract BEP20BPNM is IERC20Metadata, Ownable {
         uint purchasedSellLimit;//amount of purchased sell limit with GWT, can not increase 10% of total deposited sell limit
     }
 
-    struct marketplaceItem {
+    struct MarketplaceItem {
         string name;//Item name
         string claimLink;//Item claim link, website etc. Provided by seller
         uint bpnmPrice;//Item price in bPNM
@@ -243,10 +243,10 @@ contract BEP20BPNM is IERC20Metadata, Ownable {
     mapping(address => User) public Users;
     mapping(address => string) public AddressToUsername;
     mapping(address => uint) public MintTokenBalance;//amount of mint tokens user have. Required for NFT minting
-    mapping(address => limitsPurchases) public UserOverLimits;
-    mapping(address => frozenFundsStruct[16]) public FrozenFunds;//mapping for user frozen funds, count starts from 1 to 15
+    mapping(address => LimitsPurchases) public UserOverLimits;
+    mapping(address => FrozenFundsStruct[16]) public FrozenFunds;//mapping for user frozen funds, count starts from 1 to 15
     mapping(address => bool) public IsVerified;//user verification
-    mapping(uint => marketplaceItem) public Marketplace;//marketplace items
+    mapping(uint => MarketplaceItem) public Marketplace;//marketplace items
     mapping(address => uint[]) public UserOwnedMarketItems;//Marketplace items owned by address
     mapping(address => uint[16]) public UsersAtTreeLvl;//Amount of addresses on each tree lvl. Starts from 1
 
@@ -334,63 +334,63 @@ contract BEP20BPNM is IERC20Metadata, Ownable {
         //Set limit packs data | Cost / Allowed levels / Earn limit
         
         //fake item
-        limitPacks.push(limitPack(0,0,0));
+        limitPacks.push(LimitPack(0,0,0));
         //ID=1 | LVL = 4 | Cost = 10 USDT
-        limitPacks.push(limitPack(10e18,4,30e18));
+        limitPacks.push(LimitPack(10e18,4,30e18));
         //ID=2 | LVL = 5 | Cost = 25 USDT
-        limitPacks.push(limitPack(25e18,5,65e18));
+        limitPacks.push(LimitPack(25e18,5,65e18));
         //ID=3 | LVL = 6 | Cost = 50 USDT
-        limitPacks.push(limitPack(50e18,6,125e18));
+        limitPacks.push(LimitPack(50e18,6,125e18));
         //ID=4 | LVL = 7 | Cost = 100 USDT
-        limitPacks.push(limitPack(100e18,7,240e18));
+        limitPacks.push(LimitPack(100e18,7,240e18));
         //ID=5 | LVL = 8 | Cost = 150 USDT
-        limitPacks.push(limitPack(150e18,8,360e18));
+        limitPacks.push(LimitPack(150e18,8,360e18));
         //ID=6 | LVL = 9 | Cost = 200 USDT
-        limitPacks.push(limitPack(200e18,9,480e18));
+        limitPacks.push(LimitPack(200e18,9,480e18));
         //ID=7 | LVL = 10 | Cost = 250 USDT
-        limitPacks.push(limitPack(250e18,10,580e18));
+        limitPacks.push(LimitPack(250e18,10,580e18));
         //ID=8 | LVL = 11 | Cost = 500 USDT
-        limitPacks.push(limitPack(500e18,11,1100e18));
+        limitPacks.push(LimitPack(500e18,11,1100e18));
         //ID=9 | LVL = 12 | Cost = 1 000 USDT
-        limitPacks.push(limitPack(1000e18,12,2100e18));
+        limitPacks.push(LimitPack(1000e18,12,2100e18));
         //ID=10 | LVL = 13 | Cost = 2 000 USDT
-        limitPacks.push(limitPack(2000e18,13,4100e18));
+        limitPacks.push(LimitPack(2000e18,13,4100e18));
         //ID=11 | LVL = 14 | Cost = 5 000 USDT
-        limitPacks.push(limitPack(5000e18,14,10000e18));
+        limitPacks.push(LimitPack(5000e18,14,10000e18));
         //ID=12 | LVL = 15 | Cost = 10 000 USDT
-        limitPacks.push(limitPack(10000e18,15,20000e18));
+        limitPacks.push(LimitPack(10000e18,15,20000e18));
 
         
         //Set tree levels data | Bonus % / Freeze fee / Frezze period
         //lvl 0-3
-        treeLvls.push(treeLvlData(0,0,0 days));//treeLvls[0] is not used 
-        treeLvls.push(treeLvlData(0,0,0 days));//lvl1
-        treeLvls.push(treeLvlData(0,0,0 days));//lvl2
-        treeLvls.push(treeLvlData(0,0,0 days));//lvl3
+        treeLvls.push(TreeLvlData(0,0,0 days));//treeLvls[0] is not used 
+        treeLvls.push(TreeLvlData(0,0,0 days));//lvl1
+        treeLvls.push(TreeLvlData(0,0,0 days));//lvl2
+        treeLvls.push(TreeLvlData(0,0,0 days));//lvl3
         //lvl4
-        treeLvls.push(treeLvlData(1,0,0 days));
+        treeLvls.push(TreeLvlData(1,0,0 days));
         //lvl5
-        treeLvls.push(treeLvlData(2,80,3 days));
+        treeLvls.push(TreeLvlData(2,80,3 days));
         //lvl6
-        treeLvls.push(treeLvlData(3,70,4 days));
+        treeLvls.push(TreeLvlData(3,70,4 days));
         //lvl7
-        treeLvls.push(treeLvlData(3,70,5 days));
+        treeLvls.push(TreeLvlData(3,70,5 days));
         //lvl8
-        treeLvls.push(treeLvlData(3,65,7 days));
+        treeLvls.push(TreeLvlData(3,65,7 days));
         //lvl9
-        treeLvls.push(treeLvlData(4,65,12 days));
+        treeLvls.push(TreeLvlData(4,65,12 days));
         //lvl10
-        treeLvls.push(treeLvlData(4,60,21 days));
+        treeLvls.push(TreeLvlData(4,60,21 days));
         //lvl11
-        treeLvls.push(treeLvlData(4,60,28 days));
+        treeLvls.push(TreeLvlData(4,60,28 days));
         //lvl12
-        treeLvls.push(treeLvlData(4,55,40 days));
+        treeLvls.push(TreeLvlData(4,55,40 days));
         //lvl13
-        treeLvls.push(treeLvlData(4,55,60 days));
+        treeLvls.push(TreeLvlData(4,55,60 days));
         //lvl14
-        treeLvls.push(treeLvlData(4,50,80 days));
+        treeLvls.push(TreeLvlData(4,50,80 days));
         //lvl15
-        treeLvls.push(treeLvlData(4,50,120 days));
+        treeLvls.push(TreeLvlData(4,50,120 days));
 
         //Set cost to add additional +1% for a level
         additionalPercentCost[4] = 100e18;
@@ -414,7 +414,7 @@ contract BEP20BPNM is IERC20Metadata, Ownable {
      * @param _referrerAddress - address by whom referred
      */
     function _createUser(address _userAddress, address _referrerAddress) private {
-        _balance memory balance = _balance(0, 0, 0);
+        Balance memory balance = Balance(0, 0, 0);
 
         User memory user = User({
         referrer: _referrerAddress,
@@ -440,7 +440,7 @@ contract BEP20BPNM is IERC20Metadata, Ownable {
      * 
      * @param id Get limit pack information
      */
-    function getLimitPack(uint id) public view returns (limitPack memory) {
+    function getLimitPack(uint id) public view returns (LimitPack memory) {
         return(limitPacks[id]);
     }
 
@@ -1056,9 +1056,9 @@ contract BEP20BPNM is IERC20Metadata, Ownable {
         _mint(msg.sender,bpnmDeposited);
 
         //accrue token sell limit
-        Users[msg.sender].sellLimitLeft += btcbAmount/10*sellLimitMultiplier;
+        Users[msg.sender].sellLimitLeft += btcbAmount*sellLimitMultiplier/10;
         //increase amount of sell limit deposited for all time
-        UserOverLimits[msg.sender].totalSellLimit += btcbAmount/10*sellLimitMultiplier;
+        UserOverLimits[msg.sender].totalSellLimit += btcbAmount*sellLimitMultiplier/10;
 
         //check if new liquidity can be released from PLD, after purchase with fixed bPNM price
         _pld.performUnlock();
@@ -1565,7 +1565,7 @@ contract BEP20BPNM is IERC20Metadata, Ownable {
     function addItemToMarketplace(string memory itemName, string memory itemLink, uint itemPrice, bool verifyRequired, bool liquidityCompensated, address seller ) external onlyMarketAdmin returns(uint itemID){
         require(itemPrice>0,"[bPNM] Non zero price required");
 
-        marketplaceItem memory newItem = marketplaceItem({
+        MarketplaceItem memory newItem = MarketplaceItem({
             name: itemName,
             claimLink: itemLink,
             bpnmPrice: itemPrice,

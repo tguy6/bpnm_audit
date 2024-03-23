@@ -35,7 +35,7 @@ contract PhenomenalLiquidityDistributor is Ownable {
     uint public LiquidityUnlockPeriod = 24 hours;//period when new liquidity is unlocked
 
     //event for unlock
-    event liquidityUnlock(uint indexed unlockTimestamp, uint unlockBtcbAmount, uint bpnmBtcbBalance);
+    event LiquidityUnlock(uint indexed unlockTimestamp, uint unlockBtcbAmount, uint bpnmBtcbBalance);
 
     constructor(IERC20 _btcbTokenAddress, BpnmInt _bpnmTokenAddress) {
         require(address(_btcbTokenAddress)!=address(0),"[PLD] Non zero address");
@@ -76,7 +76,7 @@ contract PhenomenalLiquidityDistributor is Ownable {
         uint feeLiquidityInBtcb = feeLiquidityInUsdt*1e18/btcPrice;//USDT liquidity from fees equivalent in BTCB
 
         //Release formula: (1 - ( btcb bpnm / (btcb bpnm + btcb pld + btcb usdt) )) * LiquidityUnlockPercent)
-        uint unlockedBtcbPercent = (1e18-(bpnmLiquidity*1e18/(bpnmLiquidity+pldBalance+feeLiquidityInBtcb)))/10000*LiquidityUnlockPercent;
+        uint unlockedBtcbPercent = (1e18-(bpnmLiquidity*1e18/(bpnmLiquidity+pldBalance+feeLiquidityInBtcb)))*LiquidityUnlockPercent/10000;
         uint unlockedBtcbAmount = unlockedBtcbPercent * bpnmLiquidity / 1e18;
 
         //transfer liquidity to bPNM
@@ -91,7 +91,7 @@ contract PhenomenalLiquidityDistributor is Ownable {
         LastLiquidityUnlockTime = block.timestamp;
 
         //emit event
-        emit liquidityUnlock(LastLiquidityUnlockTime,unlockedBtcbAmount,bpnmLiquidity);
+        emit LiquidityUnlock(LastLiquidityUnlockTime,unlockedBtcbAmount,bpnmLiquidity);
         return true;
     }
 
