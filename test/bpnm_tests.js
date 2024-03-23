@@ -2243,19 +2243,19 @@ const {
             
             bpnmBalanceBtcb = await _btcb.balanceOf(_bpnm.address)
             console.log("bPNM BTCB balance= %s BTCB",utils.formatEther(bpnmBalanceBtcb))
-            expect(bpnmBalanceBtcb).to.be.equal(utils.parseEther("4.515555631762614375"))//4.5 + 0.5% * (1-(4.5/(4.5 + 10 + (4000/50000))))*4.5
+            expect(bpnmBalanceBtcb).to.be.equal(utils.parseEther("4.515555631762614402"))//4.5 + 0.5% * (1-(4.5/(4.5 + 10 + (4000/50000))))*4.5
             await time.increase(60*60*23);//wait 23 hours
             
             pldBalanceBtcb = await _btcb.balanceOf(_btcbCollector.address)
             console.log("PLD BTCB balance= %s BTCB",utils.formatEther(pldBalanceBtcb))
             expect(Number(utils.formatEther(pldBalanceBtcb))+Number(utils.formatEther(bpnmBalanceBtcb))).to.be.equal(14.5)
-            expect(pldBalanceBtcb).to.be.equal(utils.parseEther("9.984444368237385625"))//
+            expect(pldBalanceBtcb).to.be.equal(utils.parseEther("9.984444368237385598"))//
             
 
             unlockTime = await _btcbCollector.LastLiquidityUnlockTime();
             console.log("🚀 ~ file: bpnm_tests.js:727 ~ unlockTime:", unlockTime)
             await _btcbCollector.performUnlock();
-            expect(bpnmBalanceBtcb).to.be.equal(utils.parseEther("4.515555631762614375"))//not changed
+            expect(bpnmBalanceBtcb).to.be.equal(utils.parseEther("4.515555631762614402"))//not changed
             
             bpnmBalanceBtcb = await _btcb.balanceOf(_bpnm.address)
             console.log("bPNM BTCB balance= %s BTCB",utils.formatEther(bpnmBalanceBtcb))
@@ -2266,7 +2266,7 @@ const {
             console.log("🚀 ~ file: bpnm_tests.js:727 ~ unlockTime:", unlockTime)
             await _btcbCollector.performUnlock();
             bpnmBalanceBtcb = await _btcb.balanceOf(_bpnm.address)
-            expect(bpnmBalanceBtcb).to.be.equal(utils.parseEther("4.531140948019931347"))//same formula as above
+            expect(bpnmBalanceBtcb).to.be.equal(utils.parseEther("4.531140948019931514"))//same formula as above
             
             bpnmBalanceBtcb = await _btcb.balanceOf(_bpnm.address)
             console.log("bPNM BTCB balance= %s BTCB",utils.formatEther(bpnmBalanceBtcb))
@@ -2704,7 +2704,7 @@ const {
             
             u1Uri = await _nft.tokenURI(Number(u1Tokens[0]));//user owned token IDs
             console.log("🚀 ~ file: bpnm_tests.js:2450 ~ u1Uri:", u1Uri)
-            expect(u1Uri).to.equal("ipfs://bafybeiht73rqyi34oeasc7typtdaco54zxbwdmmdhwvzfi6t5pmp77lwai/"+u1Tokens[0])
+            expect(u1Uri).to.equal("ipfs://bafybeihfjre5ijn2obfpp6bnmk7sefecygdu6suihayvc3kqzttafi7msm/"+u1Tokens[0])
             //update uri
             await _nft.setBaseURI("ipfs://helloworld/");//user owned token IDs
             
@@ -4710,7 +4710,7 @@ const {
             
             bpnmBalanceBtcb = await _btcb.balanceOf(_bpnm.address)
             console.log("bPNM BTCB balance= %s BTCB",utils.formatEther(bpnmBalanceBtcb))
-            expect(bpnmBalanceBtcb).to.be.equal(utils.parseEther("4.515555631762614375"))//4.5 + 0.5% * (1-(4.5/(4.5 + 10 + (4000/50000))))*4.5
+            expect(bpnmBalanceBtcb).to.be.equal(utils.parseEther("4.515555631762614402"))//4.5 + 0.5% * (1-(4.5/(4.5 + 10 + (4000/50000))))*4.5
             
             //set unlock each 48hours
             await _btcbCollector.setUnlockPeriod(48);
@@ -4721,7 +4721,7 @@ const {
 
             //wait 24h to check that no unlock
             bpnmBalanceBtcb = await _btcb.balanceOf(_bpnm.address)
-            expect(bpnmBalanceBtcb).to.be.equal(utils.parseEther("4.515555631762614375"))//4.5 + 0.5% * (1-(4.5/(4.5 + 10 + (4000/50000))))*4.5
+            expect(bpnmBalanceBtcb).to.be.equal(utils.parseEther("4.515555631762614402"))//4.5 + 0.5% * (1-(4.5/(4.5 + 10 + (4000/50000))))*4.5
             expect(Number(unlockTime3)).to.be.equal(Number(unlockTime2))//unlock times are equal
             
             await time.increase(60*60*24);//wait 24 hours more, total 48 hours
@@ -4732,7 +4732,7 @@ const {
             
             bpnmBalanceBtcb = await _btcb.balanceOf(_bpnm.address)
             console.log("bPNM BTCB balance= %s BTCB",utils.formatEther(bpnmBalanceBtcb))
-            expect(bpnmBalanceBtcb).to.be.equal(utils.parseEther("4.531140948019931347"))
+            expect(bpnmBalanceBtcb).to.be.equal(utils.parseEther("4.531140948019931514"))
 
             await expect(_btcbCollector.setUnlockPeriod(1)).to.be.revertedWith("Out of range");
 
@@ -4764,7 +4764,7 @@ const {
             console.log("bPNM BTCB balance= %s BTCB",utils.formatEther(bpnmBalanceBtcb))
             
             // expect(bpnmBalanceBtcb).to.be.equal(utils.parseEther("4.515555631762614375"))//4.5 + 0.5% * (1-(4.5/(4.5 + 10 + (4000/50000) )))*4.5
-            expect(bpnmBalanceBtcb).to.be.equal(utils.parseEther("4.531111263525228750"))//4.5 + 1% * (1-(4.5/(4.5 + 10 + (4000/50000) )))*4.5
+            expect(bpnmBalanceBtcb).to.be.equal(utils.parseEther("4.531111263525228804"))//4.5 + 1% * (1-(4.5/(4.5 + 10 + (4000/50000) )))*4.5
             
 
             await expect(_btcbCollector.setUnlockPercent(200)).to.be.revertedWith("Out of range");
