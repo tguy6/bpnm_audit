@@ -10,10 +10,15 @@ import "@openzeppelin/contracts/access/Ownable.sol";
  */
 interface BpnmInt {
     function balanceOf(address account) external view returns (uint256);
+    function getBtcPrice() external view returns(uint);
+}
+/**
+ * @dev Interface for a bPNM Marketing.
+ */
+interface BpnmMarketingInt {
     function _payment() external view returns (uint);//active payment ID
     function _getPaymentContract(uint paymentID) external view returns(IERC20);
     function liquidityCollector() external view returns(address);
-    function getBtcPrice() external view returns(uint);
 }
 
 
@@ -27,6 +32,7 @@ contract PhenomenalLiquidityDistributor is Ownable {
     using SafeERC20 for IERC20;
     IERC20 public immutable btcb;
     BpnmInt public immutable bpnm;
+    BpnmMarketingInt public immutable marketing;
     address private _promoter;//address for changing distribution conditions
 
     bool isPrestart = true;
@@ -37,12 +43,14 @@ contract PhenomenalLiquidityDistributor is Ownable {
     //event for unlock
     event LiquidityUnlock(uint indexed unlockTimestamp, uint unlockBtcbAmount, uint bpnmBtcbBalance);
 
-    constructor(IERC20 _btcbTokenAddress, BpnmInt _bpnmTokenAddress) {
+    constructor(IERC20 _btcbTokenAddress, BpnmInt _bpnmTokenAddress, BpnmMarketingInt _bpnmMarketingAddress) {
         require(address(_btcbTokenAddress)!=address(0),"[PLD] Non zero address");
         require(address(_bpnmTokenAddress)!=address(0),"[PLD] Non zero address");
+        require(address(_bpnmMarketingAddress)!=address(0),"[PLD] Non zero address");
         
         bpnm = _bpnmTokenAddress;
         btcb = _btcbTokenAddress;
+        marketing = _bpnmMarketingAddress;
     }
 
     /**
@@ -69,10 +77,10 @@ contract PhenomenalLiquidityDistributor is Ownable {
             return(false);
         }
         //calc max unlock with formula
-        IERC20 stableToken = bpnm._getPaymentContract(bpnm._payment());//stable payment contract system used in bPNM
+        IERC20 stableToken = marketing._getPaymentContract(marketing._payment());//stable payment contract system used in bPNM
 
         uint btcPrice = bpnm.getBtcPrice();
-        uint feeLiquidityInUsdt = stableToken.balanceOf(bpnm.liquidityCollector());//USDT liquidity from fees
+        uint feeLiquidityInUsdt = stableToken.balanceOf(marketing.liquidityCollector());//USDT liquidity from fees
         uint feeLiquidityInBtcb = feeLiquidityInUsdt*1e18/btcPrice;//USDT liquidity from fees equivalent in BTCB
 
         //Release formula: (1 - ( btcb bpnm / (btcb bpnm + btcb pld + btcb usdt) )) * LiquidityUnlockPercent)
